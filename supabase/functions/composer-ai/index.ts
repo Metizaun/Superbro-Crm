@@ -65,7 +65,7 @@ serve(async (req) => {
         }
         const imageBuffer = await imageResponse.arrayBuffer();
         const mimeType = imageResponse.headers.get('content-type') || 'image/png';
-        const base64Image = base64Encode(new Uint8Array(imageBuffer));
+        const base64Image = base64Encode(imageBuffer);
         parts.push({
           inline_data: {
             mime_type: mimeType,
