@@ -1,4 +1,4 @@
-﻿import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 
 const corsHeaders = {
@@ -44,7 +44,7 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
+    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
 
     if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceKey) {
       return new Response(JSON.stringify({ error: "supabase_env_missing" }), {
@@ -53,8 +53,8 @@ serve(async (req) => {
       });
     }
 
-    if (!geminiApiKey) {
-      return new Response(JSON.stringify({ error: "gemini_key_missing" }), {
+    if (!lovableApiKey) {
+      return new Response(JSON.stringify({ error: "lovable_key_missing" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -95,7 +95,7 @@ serve(async (req) => {
       .limit(1)
       .maybeSingle();
 
-    const model = settings?.model || "gemini-2.5-flash";
+    const model = settings?.model || "google/gemini-2.5-flash";
     const temperature = typeof settings?.temperature === "number" ? settings.temperature : 0.2;
 
     let metadataRows = await loadMetadataCache(supabaseAdmin);
@@ -154,8 +154,8 @@ serve(async (req) => {
       messageCount: messages.length,
     });
 
-    const llmText = await callGeminiOnce(
-      geminiApiKey,
+    const llmText = await callLLM(
+      lovableApiKey,
       model,
       temperature,
       systemPrompt,
@@ -172,9 +172,8 @@ serve(async (req) => {
   }
 });
 
-async function loadMetadataCache(
-  supabaseAdmin: ReturnType<typeof createClient>,
-): Promise<MetadataRow[]> {
+// deno-lint-ignore no-explicit-any
+async function loadMetadataCache(supabaseAdmin: any): Promise<MetadataRow[]> {
   const { data } = await supabaseAdmin
     .from("database_metadata_cache")
     .select("schema_name, table_name, column_name, data_type, is_nullable, column_default")
@@ -210,26 +209,34 @@ function formatMetadata(metadata: MetadataRow[]): string {
   return result;
 }
 
-async function callGeminiOnce(
+async function callLLM(
   apiKey: string,
   model: string,
   temperature: number,
   systemPrompt: string,
   messages: ChatMessage[],
 ) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-  const contents = messages.map((msg) => ({
-    role: msg.role === "assistant" ? "model" : "user",
-    parts: [{ text: msg.content }],
-  }));
+  // Ensure model uses gateway-compatible format
+  const gatewayModel = model.includes("/") ? model : `google/${model}`;
 
-  const response = await fetch(url, {
+  const apiMessages = [
+    { role: "system", content: systemPrompt },
+    ...messages.map((msg) => ({
+      role: msg.role === "assistant" ? "assistant" : "user",
+      content: msg.content,
+    })),
+  ];
+
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({
-      systemInstruction: { parts: [{ text: systemPrompt }] },
-      contents,
-      generationConfig: { temperature },
+      model: gatewayModel,
+      messages: apiMessages,
+      temperature,
     }),
   });
 
@@ -248,12 +255,7 @@ async function callGeminiOnce(
   });
 
   const data = await response.json();
-  const parts = data?.candidates?.[0]?.content?.parts ?? [];
-  const text = parts
-    .filter((part: { text?: string }) => typeof part?.text === "string")
-    .map((part: { text: string }) => part.text)
-    .join("\n")
-    .trim();
+  const text = data?.choices?.[0]?.message?.content?.trim() ?? "";
 
   console.log(`${LOG_PREFIX} llm_text`, {
     length: text.length,

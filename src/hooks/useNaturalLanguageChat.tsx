@@ -1,5 +1,4 @@
-﻿import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganizationContext } from '@/hooks/useOrganizationContext';
 import { toast } from 'sonner';
@@ -15,7 +14,7 @@ export interface ChatMessage {
 export interface QueryResult {
   operation?: string;
   rowCount?: number;
-  data?: Array<Record<string, any>>;
+  data?: Array<Record<string, unknown>>;
 }
 
 const AUTO_EXECUTE_TAG = '[AUTO_EXECUTE]';
@@ -29,13 +28,11 @@ export function useNaturalLanguageChat() {
   const [isExecuting, setIsExecuting] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
   const [queryResult, setQueryResult] = useState<QueryResult | null>(null);
-  const [conversationId, setConversationId] = useState<string | null>(null);
 
   const clearMessages = useCallback(() => {
     setMessages([]);
     setStreamingContent('');
     setQueryResult(null);
-    setConversationId(null);
   }, []);
 
   const sendMessage = useCallback(async (content: string) => {
@@ -58,42 +55,13 @@ export function useNaturalLanguageChat() {
     setStreamingContent('');
     setQueryResult(null);
 
-    let activeConversationId = conversationId;
-
     try {
-      if (!activeConversationId) {
-        try {
-          activeConversationId = await createConversation(currentOrganization.id, user.id, content);
-          setConversationId(activeConversationId);
-        } catch (error) {
-          console.error('Conversation create error:', error);
-          activeConversationId = null;
-        }
-      }
-
-      if (activeConversationId) {
-        try {
-          await createMessage(activeConversationId, 'user', content, false);
-        } catch (error) {
-          console.error('Message create error:', error);
-        }
-      }
-
-      if (activeConversationId && messages.length === 0) {
-        const title = content.slice(0, 50) + (content.length > 50 ? '...' : '');
-        try {
-          await updateConversationTitle(activeConversationId, title);
-        } catch (error) {
-          console.error('Conversation title error:', error);
-        }
-      }
-
       const apiMessages = [
         ...messages.map((m) => ({ role: m.role, content: m.content })),
         { role: 'user', content },
       ];
 
-      const response = await sendChatMessage(apiMessages, activeConversationId || undefined, session?.access_token);
+      const response = await sendChatMessage(apiMessages, session?.access_token);
 
       if (!response.ok) {
         throw new Error('Falha ao enviar mensagem');
@@ -125,14 +93,6 @@ export function useNaturalLanguageChat() {
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, assistantMessage]);
-
-        if (activeConversationId) {
-          try {
-            await createMessage(activeConversationId, 'assistant', assistantMessage.content, false);
-          } catch (error) {
-            console.error('Message create error:', error);
-          }
-        }
       }
 
       if (!cleanedContent.trim() && !sql) {
@@ -170,7 +130,7 @@ export function useNaturalLanguageChat() {
       setStreamingContent('');
       setIsExecuting(false);
     }
-  }, [conversationId, currentOrganization, isLoading, messages, session?.access_token, user]);
+  }, [currentOrganization, isLoading, messages, session?.access_token, user]);
 
   return {
     messages,
@@ -192,42 +152,8 @@ function cleanMessageContent(content: string) {
     .trim();
 }
 
-async function createConversation(organizationId: string, userId: string, titleSeed: string) {
-  const { data, error } = await supabase
-    .from('conversations')
-    .insert({
-      organization_id: organizationId,
-      user_id: userId,
-      title: titleSeed ? titleSeed.slice(0, 50) : 'Nova conversa',
-    })
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data.id as string;
-}
-
-async function updateConversationTitle(conversationId: string, title: string) {
-  await supabase
-    .from('conversations')
-    .update({ title })
-    .eq('id', conversationId);
-}
-
-async function createMessage(conversationId: string, role: string, content: string, isHidden: boolean) {
-  await supabase
-    .from('messages')
-    .insert({
-      conversation_id: conversationId,
-      role,
-      content,
-      is_hidden: isHidden,
-    });
-}
-
 async function sendChatMessage(
   messages: { role: string; content: string }[],
-  conversationId?: string,
   accessToken?: string,
 ) {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -244,7 +170,7 @@ async function sendChatMessage(
       apikey: supabaseKey,
       Authorization: `Bearer ${accessToken || supabaseKey}`,
     },
-    body: JSON.stringify({ messages, conversationId }),
+    body: JSON.stringify({ messages }),
   });
 }
 
@@ -358,23 +284,17 @@ function extractSql(sqlBuffer: string) {
   if (!sqlBuffer) return '';
 
   const fencedSql = sqlBuffer.match(/```sql\s*([\s\S]*?)```/i);
-  if (fencedSql?.[1]) {
-    return fencedSql[1].trim();
-  }
+  if (fencedSql?.[1]) return fencedSql[1].trim();
 
   const fenced = sqlBuffer.match(/```\s*([\s\S]*?)```/);
-  if (fenced?.[1]) {
-    return fenced[1].trim();
-  }
+  if (fenced?.[1]) return fenced[1].trim();
 
   return sqlBuffer.replace(AUTO_EXECUTE_TAG, '').trim();
 }
 
 function extractSqlFromFenced(content: string) {
   const fencedSql = content.match(/```sql\s*([\s\S]*?)```/i);
-  if (fencedSql?.[1]) {
-    return fencedSql[1].trim();
-  }
+  if (fencedSql?.[1]) return fencedSql[1].trim();
   return '';
 }
 

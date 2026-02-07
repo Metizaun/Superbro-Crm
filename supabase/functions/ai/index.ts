@@ -10,9 +10,6 @@ const corsHeaders = {
   "Access-Control-Max-Age": "86400",
 };
 
-const GEMINI_ENDPOINT =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
-
 type TableSchema = {
   description: string;
   columns: string[];
@@ -23,283 +20,94 @@ const CRM_SCHEMA: Record<string, TableSchema> = {
   leads: {
     description: "Leads do CRM",
     columns: [
-      "id",
-      "organization_id",
-      "user_id",
-      "first_name",
-      "last_name",
-      "email",
-      "phone",
-      "company",
-      "website",
-      "title",
-      "industry",
-      "location",
-      "source",
-      "status",
-      "score",
-      "notes",
-      "created_at",
-      "updated_at",
+      "id", "organization_id", "user_id", "first_name", "last_name", "email",
+      "phone", "company", "website", "title", "industry", "location", "source",
+      "status", "score", "notes", "created_at", "updated_at",
     ],
-    foreignKeys: {
-      organization_id: "organizations.id",
-    },
+    foreignKeys: { organization_id: "organizations.id" },
   },
   lead_sources: {
     description: "Fontes de leads",
-    columns: [
-      "id",
-      "organization_id",
-      "name",
-      "description",
-      "created_at",
-      "updated_at",
-    ],
-    foreignKeys: {
-      organization_id: "organizations.id",
-    },
+    columns: ["id", "organization_id", "name", "description", "created_at", "updated_at"],
+    foreignKeys: { organization_id: "organizations.id" },
   },
   lead_lists: {
     description: "Listas de leads",
-    columns: [
-      "id",
-      "organization_id",
-      "user_id",
-      "name",
-      "description",
-      "type",
-      "criteria",
-      "created_at",
-      "updated_at",
-    ],
-    foreignKeys: {
-      organization_id: "organizations.id",
-    },
+    columns: ["id", "organization_id", "user_id", "name", "description", "type", "criteria", "created_at", "updated_at"],
+    foreignKeys: { organization_id: "organizations.id" },
   },
   lead_list_members: {
     description: "Relacao entre leads e listas",
-    columns: [
-      "id",
-      "list_id",
-      "lead_id",
-      "added_by",
-      "added_at",
-    ],
-    foreignKeys: {
-      list_id: "lead_lists.id",
-      lead_id: "leads.id",
-    },
+    columns: ["id", "list_id", "lead_id", "added_by", "added_at"],
+    foreignKeys: { list_id: "lead_lists.id", lead_id: "leads.id" },
   },
   deals: {
     description: "Negociacoes / oportunidades",
     columns: [
-      "id",
-      "organization_id",
-      "user_id",
-      "company_id",
-      "contact_id",
-      "title",
-      "description",
-      "value",
-      "stage",
-      "status",
-      "probability",
-      "expected_close_date",
-      "actual_close_date",
-      "notes",
-      "created_at",
-      "updated_at",
+      "id", "organization_id", "user_id", "company_id", "contact_id", "title",
+      "description", "value", "stage", "status", "probability",
+      "expected_close_date", "actual_close_date", "notes", "created_at", "updated_at",
     ],
-    foreignKeys: {
-      organization_id: "organizations.id",
-      company_id: "companies.id",
-      contact_id: "contacts.id",
-    },
+    foreignKeys: { organization_id: "organizations.id", company_id: "companies.id", contact_id: "contacts.id" },
   },
   notes: {
     description: "Anotacoes",
     columns: [
-      "id",
-      "organization_id",
-      "user_id",
-      "company_id",
-      "contact_id",
-      "title",
-      "content",
-      "tags",
-      "is_pinned",
-      "created_at",
-      "updated_at",
+      "id", "organization_id", "user_id", "company_id", "contact_id", "title",
+      "content", "tags", "is_pinned", "created_at", "updated_at",
     ],
-    foreignKeys: {
-      organization_id: "organizations.id",
-      company_id: "companies.id",
-      contact_id: "contacts.id",
-    },
+    foreignKeys: { organization_id: "organizations.id", company_id: "companies.id", contact_id: "contacts.id" },
   },
   tasks: {
     description: "Tarefas",
     columns: [
-      "id",
-      "organization_id",
-      "user_id",
-      "assigned_to",
-      "company_id",
-      "contact_id",
-      "deal_id",
-      "title",
-      "description",
-      "status",
-      "priority",
-      "due_date",
-      "completed_at",
-      "notes",
-      "created_at",
-      "updated_at",
+      "id", "organization_id", "user_id", "assigned_to", "company_id", "contact_id",
+      "deal_id", "title", "description", "status", "priority", "due_date",
+      "completed_at", "notes", "created_at", "updated_at",
     ],
-    foreignKeys: {
-      organization_id: "organizations.id",
-      company_id: "companies.id",
-      contact_id: "contacts.id",
-      deal_id: "deals.id",
-    },
+    foreignKeys: { organization_id: "organizations.id", company_id: "companies.id", contact_id: "contacts.id", deal_id: "deals.id" },
   },
   partners: {
     description: "Parceiros",
     columns: [
-      "id",
-      "organization_id",
-      "user_id",
-      "name",
-      "company_name",
-      "contact_person",
-      "email",
-      "phone",
-      "website",
-      "industry",
-      "partnership_type",
-      "status",
-      "address",
-      "city",
-      "state",
-      "country",
-      "postal_code",
-      "notes",
-      "created_at",
-      "updated_at",
+      "id", "organization_id", "user_id", "name", "company_name", "contact_person",
+      "email", "phone", "website", "industry", "partnership_type", "status",
+      "address", "city", "state", "country", "postal_code", "notes", "created_at", "updated_at",
     ],
-    foreignKeys: {
-      organization_id: "organizations.id",
-    },
+    foreignKeys: { organization_id: "organizations.id" },
   },
   partner_contracts: {
     description: "Contratos de parceiros",
     columns: [
-      "id",
-      "organization_id",
-      "user_id",
-      "partner_id",
-      "title",
-      "contract_number",
-      "contract_type",
-      "description",
-      "contract_value",
-      "currency",
-      "start_date",
-      "end_date",
-      "renewal_date",
-      "status",
-      "payment_terms",
-      "file_url",
-      "notes",
-      "created_at",
-      "updated_at",
+      "id", "organization_id", "user_id", "partner_id", "title", "contract_number",
+      "contract_type", "description", "contract_value", "currency", "start_date",
+      "end_date", "renewal_date", "status", "payment_terms", "file_url", "notes",
+      "created_at", "updated_at",
     ],
-    foreignKeys: {
-      organization_id: "organizations.id",
-      partner_id: "partners.id",
-    },
+    foreignKeys: { organization_id: "organizations.id", partner_id: "partners.id" },
   },
   companies: {
     description: "Empresas",
     columns: [
-      "id",
-      "organization_id",
-      "user_id",
-      "name",
-      "industry",
-      "website",
-      "phone",
-      "email",
-      "address",
-      "city",
-      "state",
-      "country",
-      "postal_code",
-      "employee_count",
-      "annual_revenue",
-      "notes",
-      "created_at",
-      "updated_at",
+      "id", "organization_id", "user_id", "name", "industry", "website", "phone",
+      "email", "address", "city", "state", "country", "postal_code",
+      "employee_count", "annual_revenue", "notes", "created_at", "updated_at",
     ],
-    foreignKeys: {
-      organization_id: "organizations.id",
-    },
+    foreignKeys: { organization_id: "organizations.id" },
   },
   contacts: {
     description: "Contatos",
     columns: [
-      "id",
-      "organization_id",
-      "user_id",
-      "company_id",
-      "first_name",
-      "last_name",
-      "email",
-      "phone",
-      "company",
-      "position",
-      "birthday",
-      "anniversary",
-      "important_dates",
-      "notes",
-      "personal_notes",
-      "created_at",
-      "updated_at",
+      "id", "organization_id", "user_id", "company_id", "first_name", "last_name",
+      "email", "phone", "company", "position", "birthday", "anniversary",
+      "important_dates", "notes", "personal_notes", "created_at", "updated_at",
     ],
-    foreignKeys: {
-      organization_id: "organizations.id",
-      company_id: "companies.id",
-    },
+    foreignKeys: { organization_id: "organizations.id", company_id: "companies.id" },
   },
 };
 
 const ALLOWED_TABLES = Object.keys(CRM_SCHEMA);
 const INSERT_TABLES = ["tasks", "notes"];
-
-type GeminiPart =
-  | { text: string }
-  | {
-      functionCall: {
-        name: string;
-        args?: Record<string, unknown> | string;
-      };
-    }
-  | {
-      functionResponse: {
-        name: string;
-        response: { content: unknown };
-      };
-    };
-
-type GeminiResponse = {
-  candidates?: Array<{
-    content?: {
-      parts?: GeminiPart[];
-    };
-  }>;
-};
 
 type CrmFilter = {
   column?: string;
@@ -327,25 +135,22 @@ type CrmInsertArgs = {
   values?: Record<string, unknown>;
 };
 
-function getTextFromParts(parts?: GeminiPart[]) {
-  if (!parts) return "";
-  const textParts = parts.filter((part) => "text" in part) as Array<{
-    text: string;
-  }>;
-  return textParts.map((part) => part.text).join("\n").trim();
-}
+type ToolCall = {
+  id: string;
+  type: "function";
+  function: {
+    name: string;
+    arguments: string;
+  };
+};
 
-function coerceArgs(args?: Record<string, unknown> | string) {
-  if (!args) return {};
-  if (typeof args === "string") {
-    try {
-      return JSON.parse(args);
-    } catch {
-      return {};
-    }
-  }
-  return args;
-}
+type OpenAIMessage = {
+  role: string;
+  content?: string | null;
+  tool_calls?: ToolCall[];
+  tool_call_id?: string;
+  name?: string;
+};
 
 function formatSchema(schema: Record<string, TableSchema>) {
   const lines: string[] = [];
@@ -353,13 +158,9 @@ function formatSchema(schema: Record<string, TableSchema>) {
     const meta = schema[table];
     if (!meta) continue;
     const fkText = meta.foreignKeys
-      ? ` | FKs: ${Object.entries(meta.foreignKeys)
-        .map(([col, ref]) => `${col}->${ref}`)
-        .join(", ")}`
+      ? ` | FKs: ${Object.entries(meta.foreignKeys).map(([col, ref]) => `${col}->${ref}`).join(", ")}`
       : "";
-    lines.push(
-      `- ${table}: ${meta.description}. Colunas: ${meta.columns.join(", ")}${fkText}`,
-    );
+    lines.push(`- ${table}: ${meta.description}. Colunas: ${meta.columns.join(", ")}${fkText}`);
   }
   return lines.join("\n");
 }
@@ -371,12 +172,8 @@ function hasOrganizationId(table: string) {
 function validateColumns(table: string, columns: string[]) {
   const meta = CRM_SCHEMA[table];
   if (!meta) return "Table not allowed";
-  const invalid = columns.filter(
-    (column) => column !== "*" && !meta.columns.includes(column),
-  );
-  if (invalid.length) {
-    return `Invalid columns: ${invalid.join(", ")}`;
-  }
+  const invalid = columns.filter((column) => column !== "*" && !meta.columns.includes(column));
+  if (invalid.length) return `Invalid columns: ${invalid.join(", ")}`;
   return null;
 }
 
@@ -405,9 +202,7 @@ function detectEntity(message: string) {
   if (/(empresa|empresas|companies?)/.test(text)) return "companies";
   if (/(parceiro|parceiros|partners?)/.test(text)) return "partners";
   if (/(lista de leads|lead list|lead_lists?)/.test(text)) return "lead_lists";
-  if (/(lead source|lead_sources?|fonte de lead|fontes de lead)/.test(text)) {
-    return "lead_sources";
-  }
+  if (/(lead source|lead_sources?|fonte de lead|fontes de lead)/.test(text)) return "lead_sources";
   if (/(leads?)/.test(text)) return "leads";
   return null;
 }
@@ -425,50 +220,85 @@ function extractCompanyName(message: string) {
 }
 
 function extractTitle(message: string) {
-  const quoted = message.match(/["“”']([^"“”']+)["“”']/);
+  const quoted = message.match(/["""']([^"""']+)["""']/);
   if (quoted) return quoted[1].trim();
   const named = message.match(/(?:chamada|chamado|titulo|título)\s+([^.\n]+)/i);
   if (named) return named[1].trim();
   return "";
 }
 
-async function callGemini(
-  apiKey: string,
-  contents: Array<{ role: string; parts: GeminiPart[] }>,
-  systemInstruction: string,
-) {
-  const response = await fetch(GEMINI_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "x-goog-api-key": apiKey,
-      "Content-Type": "application/json",
+// OpenAI-compatible tools definition
+const openaiTools = [
+  {
+    type: "function" as const,
+    function: {
+      name: "crm_query",
+      description: "Consulta generica em tabelas CRM.",
+      parameters: {
+        type: "object",
+        properties: {
+          table: { type: "string", enum: ALLOWED_TABLES },
+          select: { type: "array", items: { type: "string" } },
+          filters: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                column: { type: "string" },
+                op: { type: "string", enum: ["eq", "ilike", "gte", "lte", "in"] },
+                value: {},
+              },
+              required: ["column", "op", "value"],
+            },
+          },
+          order_by: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                column: { type: "string" },
+                ascending: { type: "boolean" },
+              },
+              required: ["column"],
+            },
+          },
+          limit: { type: "number" },
+          offset: { type: "number" },
+          aggregate: {
+            type: "object",
+            properties: {
+              type: { type: "string", enum: ["count"] },
+              column: { type: "string" },
+            },
+            required: ["type"],
+          },
+        },
+        required: ["table"],
+      },
     },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: systemInstruction }] },
-      contents,
-      tools,
-    }),
-  });
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "crm_insert",
+      description: "Insere dados no CRM (somente tasks e notes).",
+      parameters: {
+        type: "object",
+        properties: {
+          table: { type: "string", enum: INSERT_TABLES },
+          values: { type: "object" },
+        },
+        required: ["table", "values"],
+      },
+    },
+  },
+];
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Gemini API error: ${response.status} ${response.statusText} ${errorText}`,
-    );
-  }
-
-  return (await response.json()) as GeminiResponse;
-}
-
-async function runCrmQuery(
-  supabase: ReturnType<typeof createClient>,
-  organizationId: string,
-  args: CrmQueryArgs,
-) {
+// deno-lint-ignore no-explicit-any
+async function runCrmQuery(supabase: any, organizationId: string, args: CrmQueryArgs) {
   const table = String(args.table ?? "");
-  if (!ALLOWED_TABLES.includes(table)) {
-    return { error: "Table not allowed" };
-  }
+  if (!ALLOWED_TABLES.includes(table)) return { error: "Table not allowed" };
+
   const select = Array.isArray(args.select) ? args.select : [];
   const selectColumns = select.length ? select : ["*"];
   const columnError = validateColumns(table, selectColumns);
@@ -495,7 +325,7 @@ async function runCrmQuery(
     if (colError) return { error: colError };
 
     if (op === "eq") {
-      query = query.eq(column, filter.value);
+      query = query.eq(column, filter.value as string);
     } else if (op === "ilike") {
       query = query.ilike(column, String(filter.value ?? ""));
     } else if (op === "gte") {
@@ -504,7 +334,7 @@ async function runCrmQuery(
       query = query.lte(column, filter.value as string | number);
     } else if (op === "in") {
       if (Array.isArray(filter.value)) {
-        query = query.in(column, filter.value);
+        query = query.in(column, filter.value as string[]);
       } else {
         return { error: "Filter value must be array for in" };
       }
@@ -528,8 +358,7 @@ async function runCrmQuery(
 
   if (!isCount) {
     const limit = getLimit(args.limit);
-    const offset =
-      typeof args.offset === "number" ? Math.max(0, Math.floor(args.offset)) : 0;
+    const offset = typeof args.offset === "number" ? Math.max(0, Math.floor(args.offset)) : 0;
     query = offset ? query.range(offset, offset + limit - 1) : query.limit(limit);
   }
 
@@ -539,115 +368,71 @@ async function runCrmQuery(
   return data ?? [];
 }
 
-async function runCrmInsert(
-  supabase: ReturnType<typeof createClient>,
-  organizationId: string,
-  userId: string,
-  args: CrmInsertArgs,
-) {
+// deno-lint-ignore no-explicit-any
+async function runCrmInsert(supabase: any, organizationId: string, userId: string, args: CrmInsertArgs) {
   const table = String(args.table ?? "");
-  if (!INSERT_TABLES.includes(table)) {
-    return { error: "Insert table not allowed" };
-  }
+  if (!INSERT_TABLES.includes(table)) return { error: "Insert table not allowed" };
+
   const meta = CRM_SCHEMA[table];
   if (!meta) return { error: "Table not allowed" };
-  if (typeof args.values !== "object" || args.values === null) {
-    return { error: "Values must be an object" };
-  }
-  const values = { ...(args.values as Record<string, unknown>) };
+  if (typeof args.values !== "object" || args.values === null) return { error: "Values must be an object" };
+
+  const values: Record<string, unknown> = { ...(args.values as Record<string, unknown>) };
   const keys = Object.keys(values);
   const columnError = validateColumns(table, keys);
   if (columnError) return { error: columnError };
 
-  if (meta.columns.includes("organization_id")) {
-    values.organization_id = organizationId;
-  }
-  if (meta.columns.includes("user_id")) {
-    values.user_id = userId;
-  }
-  if (table === "tasks" && values.status === undefined) {
-    values.status = "Pending";
-  }
+  if (meta.columns.includes("organization_id")) values.organization_id = organizationId;
+  if (meta.columns.includes("user_id")) values.user_id = userId;
+  if (table === "tasks" && values.status === undefined) values.status = "Pending";
 
   const title = String(values.title ?? "").trim();
-  if (!title) {
-    return { error: "missing_title" };
-  }
+  if (!title) return { error: "missing_title" };
 
-  const { data, error } = await supabase.from(table).insert(values).select("*");
+  const { data, error } = await supabase.from(table).insert(values as Record<string, string>).select("*");
   if (error) return { error: error.message };
   return data ?? [];
 }
 
-const tools = [
-  {
-    functionDeclarations: [
-      {
-        name: "crm_query",
-        description: "Consulta generica em tabelas CRM.",
-        parameters: {
-          type: "object",
-          properties: {
-            table: { type: "string", enum: ALLOWED_TABLES },
-            select: {
-              type: "array",
-              items: { type: "string" },
-            },
-            filters: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  column: { type: "string" },
-                  op: {
-                    type: "string",
-                    enum: ["eq", "ilike", "gte", "lte", "in"],
-                  },
-                  value: {},
-                },
-                required: ["column", "op", "value"],
-              },
-            },
-            order_by: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  column: { type: "string" },
-                  ascending: { type: "boolean" },
-                },
-                required: ["column"],
-              },
-            },
-            limit: { type: "number" },
-            offset: { type: "number" },
-            aggregate: {
-              type: "object",
-              properties: {
-                type: { type: "string", enum: ["count"] },
-                column: { type: "string" },
-              },
-              required: ["type"],
-            },
-          },
-          required: ["table"],
-        },
-      },
-      {
-        name: "crm_insert",
-        description: "Insere dados no CRM (somente tasks e notes).",
-        parameters: {
-          type: "object",
-          properties: {
-            table: { type: "string", enum: INSERT_TABLES },
-            values: { type: "object" },
-          },
-          required: ["table", "values"],
-        },
-      },
-    ],
-  },
-];
+async function callLLM(
+  apiKey: string,
+  messages: OpenAIMessage[],
+  systemInstruction: string,
+  useTools: boolean,
+) {
+  const apiMessages: OpenAIMessage[] = [
+    { role: "system", content: systemInstruction },
+    ...messages,
+  ];
+
+  const body: Record<string, unknown> = {
+    model: "google/gemini-2.5-flash",
+    messages: apiMessages,
+    temperature: 0.3,
+  };
+
+  if (useTools) {
+    body.tools = openaiTools;
+    body.tool_choice = "auto";
+  }
+
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("[ai] llm_error", { status: response.status, bodyLength: errorText.length });
+    throw new Error(`LLM API error: ${response.status}`);
+  }
+
+  return await response.json();
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -672,33 +457,25 @@ serve(async (req) => {
       });
     }
 
-    const apiKey = Deno.env.get("GEMINI_API_KEY");
+    const apiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!apiKey) {
-      return new Response(
-        JSON.stringify({ error: "GEMINI_API_KEY not configured" }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
+      return new Response(JSON.stringify({ error: "LOVABLE_API_KEY not configured" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY");
     if (!supabaseUrl || !supabaseKey) {
-      return new Response(
-        JSON.stringify({ error: "Supabase environment not configured" }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
+      return new Response(JSON.stringify({ error: "Supabase environment not configured" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey, {
-      global: {
-        headers: { Authorization: authHeader },
-      },
+      global: { headers: { Authorization: authHeader } },
     });
 
     const { data: userData, error: userError } = await supabase.auth.getUser();
@@ -729,7 +506,7 @@ serve(async (req) => {
       "Voce e um agente de dados CRM conectado ao Supabase.",
       "Sempre use crm_query ou crm_insert para ler e escrever.",
       "Nunca invente tabelas ou colunas. Use apenas o schema fornecido.",
-      "Respeite as foreign keys. Se nao houver relacao, nao faça join.",
+      "Respeite as foreign keys. Se nao houver relacao, nao faca join.",
       "Se faltar titulo ao criar task ou nota, pergunte ao usuario o titulo.",
       deepSearch
         ? "Responda com mais profundidade, detalhando raciocinio e recomendacoes."
@@ -742,40 +519,40 @@ serve(async (req) => {
       "- Usuario: 'Quem sao meus contatos?' -> crm_query em contacts, order_by created_at desc.",
       "- Usuario: 'Quantas tasks em aberto?' -> crm_query em tasks com filter status Pending e aggregate count.",
       "- Usuario: 'Empresa Acme tem quantas tasks?' -> crm_query em companies para pegar id, depois crm_query em tasks com company_id.",
-      "- Usuario: 'Crie uma task chamada \"Follow up\"' -> crm_insert em tasks com title.",
+      "- Usuario: 'Crie uma task chamada Follow up' -> crm_insert em tasks com title.",
       "- Usuario: 'Crie uma nota sobre negociacao X' -> crm_insert em notes com title e content.",
     ].join("\n");
 
-    const contents: Array<{ role: string; parts: GeminiPart[] }> = [];
+    const messages: OpenAIMessage[] = [];
     if (Array.isArray(history)) {
       for (const item of history) {
         if (!item || typeof item !== "object") continue;
         const role = String((item as { role?: string }).role ?? "");
         const content = String((item as { content?: string }).content ?? "");
         if ((role === "user" || role === "assistant") && content.trim()) {
-          contents.push({ role, parts: [{ text: content }] });
+          messages.push({ role, content });
         }
       }
     }
-    contents.push({ role: "user", parts: [{ text: message }] });
+    messages.push({ role: "user", content: message });
 
     let finalText = "";
     let iteration = 0;
 
     while (iteration < 3) {
-      const geminiResponse = await callGemini(
-        apiKey,
-        contents,
-        systemInstruction,
-      );
-      const parts = geminiResponse.candidates?.[0]?.content?.parts || [];
-      const functionCalls = parts.filter(
-        (part) => "functionCall" in part,
-      ) as Array<{
-        functionCall: { name: string; args?: Record<string, unknown> | string };
-      }>;
+      const llmResponse = await callLLM(apiKey, messages, systemInstruction, true);
+      const choice = llmResponse?.choices?.[0];
+      const assistantMessage = choice?.message;
 
-      if (functionCalls.length === 0) {
+      if (!assistantMessage) {
+        finalText = "Desculpe, nao consegui gerar uma resposta agora.";
+        break;
+      }
+
+      const toolCalls: ToolCall[] = assistantMessage.tool_calls || [];
+
+      if (toolCalls.length === 0) {
+        // No tool calls - check if we should do fallback detection
         if (iteration === 0) {
           const entity = detectEntity(message);
           const createIntent = isCreateIntent(message);
@@ -784,29 +561,26 @@ serve(async (req) => {
           if (createIntent && (entity === "tasks" || entity === "notes")) {
             const title = extractTitle(message);
             if (!title) {
-              finalText =
-                entity === "tasks"
-                  ? "Qual o nome da tarefa?"
-                  : "Qual o titulo da nota?";
+              finalText = entity === "tasks" ? "Qual o nome da tarefa?" : "Qual o titulo da nota?";
               break;
             }
             const values: Record<string, unknown> = { title };
-            const result = await runCrmInsert(
-              supabase,
-              organizationId,
-              userData.user.id,
-              { table: entity, values },
-            );
-            contents.push({
-              role: "user",
-              parts: [
-                {
-                  functionResponse: {
-                    name: "crm_insert",
-                    response: { content: result },
-                  },
-                },
-              ],
+            const result = await runCrmInsert(supabase, organizationId, userData.user.id, { table: entity, values });
+
+            // Add tool result and continue
+            messages.push({
+              role: "assistant",
+              content: null,
+              tool_calls: [{
+                id: "fallback_insert",
+                type: "function",
+                function: { name: "crm_insert", arguments: JSON.stringify({ table: entity, values }) },
+              }],
+            });
+            messages.push({
+              role: "tool",
+              tool_call_id: "fallback_insert",
+              content: JSON.stringify(result),
             });
             iteration += 1;
             continue;
@@ -820,11 +594,8 @@ serve(async (req) => {
             };
 
             if (entity === "tasks" && isOpenTasksIntent(message)) {
-              args.filters = [
-                { column: "status", op: "eq", value: "Pending" },
-              ];
+              args.filters = [{ column: "status", op: "eq", value: "Pending" }];
             }
-
             if (countIntent) {
               args.aggregate = { type: "count", column: "id" };
             }
@@ -834,106 +605,79 @@ serve(async (req) => {
               const companyResult = await runCrmQuery(supabase, organizationId, {
                 table: "companies",
                 select: ["id", "name"],
-                filters: [
-                  { column: "name", op: "ilike", value: `%${companyName}%` },
-                ],
+                filters: [{ column: "name", op: "ilike", value: `%${companyName}%` }],
                 limit: 1,
               });
-              if (
-                Array.isArray(companyResult) &&
-                companyResult.length > 0 &&
-                (companyResult[0] as { id?: string }).id
-              ) {
+              if (Array.isArray(companyResult) && companyResult.length > 0 && (companyResult[0] as { id?: string }).id) {
                 args.filters = [
                   ...(args.filters ?? []),
-                  {
-                    column: "company_id",
-                    op: "eq",
-                    value: (companyResult[0] as { id: string }).id,
-                  },
+                  { column: "company_id", op: "eq", value: (companyResult[0] as { id: string }).id },
                 ];
               }
             }
 
-            const result = await runCrmQuery(
-              supabase,
-              organizationId,
-              args,
-            );
-            contents.push({
-              role: "user",
-              parts: [
-                {
-                  functionResponse: {
-                    name: "crm_query",
-                    response: { content: result },
-                  },
-                },
-              ],
+            const result = await runCrmQuery(supabase, organizationId, args);
+
+            messages.push({
+              role: "assistant",
+              content: null,
+              tool_calls: [{
+                id: "fallback_query",
+                type: "function",
+                function: { name: "crm_query", arguments: JSON.stringify(args) },
+              }],
+            });
+            messages.push({
+              role: "tool",
+              tool_call_id: "fallback_query",
+              content: JSON.stringify(result),
             });
             iteration += 1;
             continue;
           }
         }
 
-        finalText = getTextFromParts(parts);
+        finalText = assistantMessage.content ?? "";
         break;
       }
 
-      for (const call of functionCalls) {
-        const name = call.functionCall.name;
-        const args = coerceArgs(call.functionCall.args);
-        let result: unknown = [];
+      // Process tool calls
+      messages.push({
+        role: "assistant",
+        content: assistantMessage.content ?? null,
+        tool_calls: toolCalls,
+      });
 
+      for (const call of toolCalls) {
+        const name = call.function.name;
+        let args: Record<string, unknown> = {};
+        try {
+          args = JSON.parse(call.function.arguments);
+        } catch {
+          args = {};
+        }
+
+        let result: unknown = [];
         try {
           if (name === "crm_query") {
-            result = await runCrmQuery(
-              supabase,
-              organizationId,
-              args as CrmQueryArgs,
-            );
+            result = await runCrmQuery(supabase, organizationId, args as CrmQueryArgs);
           } else if (name === "crm_insert") {
-            result = await runCrmInsert(
-              supabase,
-              organizationId,
-              userData.user.id,
-              args as CrmInsertArgs,
-            );
-            if (
-              typeof result === "object" &&
-              result !== null &&
-              "error" in result &&
-              (result as { error?: string }).error === "missing_title"
-            ) {
-              finalText =
-                (args as CrmInsertArgs).table === "tasks"
-                  ? "Qual o nome da tarefa?"
-                  : "Qual o titulo da nota?";
+            result = await runCrmInsert(supabase, organizationId, userData.user.id, args as CrmInsertArgs);
+            if (typeof result === "object" && result !== null && "error" in result && (result as { error?: string }).error === "missing_title") {
+              finalText = (args as CrmInsertArgs).table === "tasks" ? "Qual o nome da tarefa?" : "Qual o titulo da nota?";
               break;
             }
           } else {
             result = { error: `Unknown function: ${name}` };
           }
         } catch (error) {
-          result = {
-            error: error instanceof Error ? error.message : "Unknown error",
-          };
+          result = { error: error instanceof Error ? error.message : "Unknown error" };
         }
 
-        if (finalText) {
-          break;
-        }
-
-        contents.push({
-          role: "user",
-          parts: [
-            {
-              functionResponse: {
-                name,
-                response: { content: result },
-              },
-            },
-          ],
+        messages.push({
+          role: "tool",
+          tool_call_id: call.id,
+          content: JSON.stringify(result),
         });
       }
 
@@ -942,8 +686,9 @@ serve(async (req) => {
     }
 
     if (!finalText) {
-      finalText =
-        "Desculpe, nao consegui gerar uma resposta agora. Tente novamente.";
+      // One final call to get the text response after tool results
+      const finalResponse = await callLLM(apiKey, messages, systemInstruction, false);
+      finalText = finalResponse?.choices?.[0]?.message?.content ?? "Desculpe, nao consegui gerar uma resposta agora. Tente novamente.";
     }
 
     return new Response(JSON.stringify({ response: finalText }), {
